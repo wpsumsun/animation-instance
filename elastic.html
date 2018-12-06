@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>缓冲运动</title>
+    <style>
+        .wrapper { width: 100px; height: 100px; background: #3db; position: absolute;left: 20px;top: 60px}
+        .line { width: 1px; position: absolute;left: 500px;top: 60px;background: black;height: 100px;}
+    </style>
+</head>
+<body>
+<button id="test">向右缓冲运动</button>
+<button id="test2">向下缓冲运动</button>
+<button id="test3">还原</button>
+<div class="wrapper"></div>
+<div class="line"></div>
+<script>
+    /**
+    @param trigger 目标元素
+    @param direction 方向
+    @param target 目标点
+    @param maxDis 弹性最大距离
+    @param rate 弹性系数
+    @param callback 运动结束的回调函数
+    **/
+    function bufferAnimation(options) {
+        var triggerElement = document.querySelector(options.trigger)
+        var direction = options.direction || 'left'
+        var target = options.target
+        var rate = rate || 1
+        var maxDis = options.maxDis || target/5
+        var current = parseFloat(getComputedStyle(triggerElement)[direction])
+        if (current === target) { return }
+        var timerId
+        var step
+            
+        function stepHandler() {
+            step = current + target + maxDis*rate
+            rate*=-0.5
+            console.log(current + step)
+            triggerElement.style[direction] =  current + step + 'px'
+            timerId = requestAnimationFrame(stepHandler)
+            if (Math.round(maxDis*rate) === 0) {
+                cancelAnimationFrame(timerId)
+                triggerElement.style[direction] =  target + 'px'
+                options.callback && options.callback()
+            }
+        }
+
+        timerId = requestAnimationFrame(stepHandler)
+
+    }
+    var options = {
+        trigger: '.wrapper',
+        target: 500,
+    }
+    var options2 = {
+        trigger: '.wrapper',
+        target: 400,
+        direction: 'top',
+        callback: function() {
+            alert('运动结束')
+        },
+    }
+    var btn1 = document.querySelector('#test')
+    var btn2 = document.querySelector('#test2')
+    var btn3 = document.querySelector('#test3')
+    btn1.addEventListener('click', function() {
+        bufferAnimation(options)
+    })
+    btn2.addEventListener('click', function() {
+        bufferAnimation(options2)
+    })
+    btn3.addEventListener('click', function() {
+        var wrapper = document.querySelector('.wrapper')
+        wrapper.style.left = '20px'
+        wrapper.style.top = '60px'
+    })
+</script>
+</body>
+</html>
